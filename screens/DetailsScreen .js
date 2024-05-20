@@ -1,85 +1,95 @@
 
-
-
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import  { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, Pressable, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useFavorites } from '../store/FavoriteContext'
+import axios from 'axios';
+import { useFavorites } from '../store/FavoriteContext';
 import { Colors } from '../Constants/Colors';
-import { genreMap } from '../data/Genres';
+
 import Butn from '../components/Butn';
 import RoundIconBtn from '../components/RoundIconBtn';
 
 const DetailScreen = ({ route }) => {
-  const movie = route.params.movie;
- 
+  const movieId = route.params.movieId;
   const navigation = useNavigation();
   const { addFavorite } = useFavorites();
+  const [movieDetails, setMovieDetails] = useState({});
+
+  const fetchMovieDetails = async () => {
+    try {
+      const result = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}?api_key=75cc236c758acb8b090acf828728fe53&language=en-US`);
+     
+      setMovieDetails(result.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+   
+
+    if (movieId) {
+      fetchMovieDetails();
+    }
+  }, [movieId]);
 
   const handleAddToFavorites = () => {
-    addFavorite(movie);
+    if (!movieDetails) return;
+    addFavorite(movieDetails);
     navigation.navigate('Favourites');
   };
   const maxGenresToShow = 4;
-  const genreIds = [...new Set(movie.genre_ids)]; 
-  const genreDescriptions = genreIds.slice(0, maxGenresToShow).map(id => genreMap[id]).join(', ');
- 
+  const genres = movieDetails.genres? movieDetails.genres.map(genre => genre.name) : [];
+  const genreDescriptions = genres.length > 0? genres.slice(0, maxGenresToShow).join(', ') : '';
   return (
-  
-      
-      <View style={styles.container}>
-        <View style={{paddingTop:30}}>
-          <Image source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }} style={styles.poster} />
-          <View style={styles.textContainer}>
-            <Text style={styles.title}>{movie.title}</Text>
-            <Text style={{ fontSize: 18 }}>Rating: {movie.vote_average}</Text>
-          </View>
-          <View style={styles.innerText}>
-            <View style={styles.duration}>
-            <Text style={styles.text}>Duration: {movie.runtime||144} min</Text>
-            <Text style={styles.text}>Release Date: {movie.release_date}</Text>
-            </View>
-            <View style={styles.genresContainer}>
-                {genreDescriptions.split(', ').map((genre, index) => (
-               <View key={index} style={styles.genreItem}>
-                 <Text style={{fontSize:20,padding:6}}>{genre}</Text>
-                </View>
-                 ))}
-             </View>
-          </View>
+    <View style={styles.container}>
+      <View style={{ paddingTop: 20 }}>
+        <Image source={{ uri: `https://image.tmdb.org/t/p/w500${movieDetails?.poster_path}` }} style={styles.poster} />
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>{movieDetails?.title}</Text>
+          <Text style={{ fontSize: 18 }}>Rating: {movieDetails?.vote_average}</Text>
         </View>
-        <Text style={{ fontSize: 22,margin:6 }}>Overview</Text>
-        <View style={styles.containerOverview}>
-          <Text style={styles.overview}>{movie.overview}</Text>
-        </View>
-        <RoundIconBtn style={styles.btnHeart} 
-      antIconName='heart-plus'
-        onPress={handleAddToFavorites} 
-        size={44}
-        color='red'
-        
-        />
-       
-<Butn 
-  style={styles.btnfleche}
-  antIconName='arrowleft'
-  color='#fff'
-  onPress={() => navigation.goBack()} 
-/>
-
+        <View style={styles.innerText}>
+          <View style={styles.duration}>
+            <Text style={styles.text}>Duration: {movieDetails?.runtime } min</Text>
+            <Text style={styles.text}>Release Date: {movieDetails?.release_date}</Text>
+          </View>
+          <View style={styles.genresContainer}>
+        {genreDescriptions.split(', ').map((genre, index) => (
+          <View key={index} style={styles.genreItem}>
+            <Text style={{ fontSize: 20, padding: 4 }}>{genre}</Text>
+          </View>
+        ))}
       </View>
-   
+        </View>
+      </View>
+      <Text style={{ fontSize: 18, margin: 6 }}>Overview</Text>
+      <View style={styles.containerOverview}>
+        <Text style={styles.overview}>{movieDetails?.overview}</Text>
+      </View>
+      <RoundIconBtn style={styles.btnHeart}
+        antIconName='heart-plus'
+        onPress={handleAddToFavorites}
+        size={44}
+        color='red' />
+      <Butn style={styles.btnfleche}
+        antIconName='arrowleft'
+        color='#fff'
+        onPress={() => navigation.navigate('Home')}
+      />
+    </View>
   );
 };
 
+const Height = Dimensions.get('window').height;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-   
   },
   poster: {
     width: '100%',
-    height: 300,
+    height: Height / 2 - 120,
     contentFit: "fill",
     marginBottom: 10,
     resizeMode: 'stretch',
@@ -87,34 +97,30 @@ const styles = StyleSheet.create({
   textContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 8,
+    padding: 6,
     marginRight: 10,
     flexWrap: 'wrap',
-   
   },
   innerText: {
     flexDirection: 'column',
     marginLeft: 10,
-   
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 5,
   },
-  duration:{
-    flexDirection:'row',
-    justifyContent:'space-evenly'
+  duration: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
   },
-  
   text: {
-    fontSize: 19,
+    fontSize: 16,
     marginBottom: 8,
   },
   overview: {
-    fontSize: 20,
+    fontSize: 18,
     marginLeft: 8,
-    
   },
   containerImage: {
     backgroundColor: Colors.Primary,
@@ -122,44 +128,41 @@ const styles = StyleSheet.create({
   containerOverview: {
     borderColor: Colors.Dark,
     borderWidth: 3,
-    padding: 7,
-    margin: 16,
-   
+    padding: 5,
+    margin: 12,
   },
   btnHeart: {
-    position:'absolute',
+    position: 'absolute',
     top: 35,
     right: 25,
-    padding:8,
-    
-  }, 
+    padding: 8,
+  },
   genresContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
   },
   genreItem: {
-    backgroundColor: Colors.Primary, 
-    borderRadius: 5, 
-    paddingHorizontal: 12,
-    margin: 5, 
-    borderBlockColor:Colors.Dark,
-    borderWidth:1,
-    borderRadius:20,
-  
+    backgroundColor: Colors.Primary,
+    borderRadius: 5,
+    paddingHorizontal: 4,
+    margin: 5,
+    borderBlockColor: Colors.Dark,
+    borderWidth: 1,
+    borderRadius: 20,
   },
   btnfleche: {
     position: 'absolute',
     top: 45,
     left: 25,
-    padding:8,
-     backgroundColor:Colors.Light
-   
-
+    padding: 8,
+    backgroundColor: Colors.Light,
   },
 });
 
 export default DetailScreen;
+
+
 
 
 
