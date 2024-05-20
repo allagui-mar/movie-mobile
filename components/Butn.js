@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { StyleSheet } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Colors } from '../Constants/Colors';
