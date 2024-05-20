@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { View,  StyleSheet,FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useFavorites } from '../store/FavoriteContext';
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 50,
-    zIndex: 1,
+  
   },
 });
 
