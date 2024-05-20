@@ -28,17 +28,30 @@ const HomeScreen = () => {
   }, []);
 
   useEffect(() => {
-    const filteredMovies = movies.filter(movie =>
-      movie.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    if (filteredMovies.length) {
-      setMovies(filteredMovies);
-      setResultNotFound(false);
+    let isMounted = true;
+  
+    if (searchTerm === '') {
+      if (isMounted) {
+        fetchData();
+      }
     } else {
-      setResultNotFound(true);
+      const filteredMovies = movies.filter(movie =>
+        movie.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  
+      if (filteredMovies.length) {
+        setMovies(filteredMovies);
+        setResultNotFound(false);
+      } else {
+        setResultNotFound(true);
+      }
     }
+  
+    return () => {
+      isMounted = false;
+    };
   }, [searchTerm]);
+  
 
   const handleMovies = ({ item }) => {
   
@@ -46,28 +59,31 @@ const HomeScreen = () => {
       posterPath={item.poster_path}
       AverageRating={item.vote_average}
       
-      onPress={() => navigation.navigate('Details', { movie: item })}
+      onPress={() => navigation.navigate('Details', { movieId: item.id })}
     />;
   };
 
   return (
     <View style={styles.containerHome}>
       <SearchMovie onChangeText={setSearchTerm} value={searchTerm} />
+
       {!resultNotFound && movies.length>0? 
-        <FlatList
-          data={movies}
-          renderItem={handleMovies}
-          keyExtractor={item => item.id}
-          style={{ flex: 1 }}
-          numColumns={2}
-        />
+       <FlatList
+       data={movies}
+       renderItem={handleMovies}
+       keyExtractor={item => item.id.toString()}
+       style={{ flex: 1 }}
+       numColumns={2}
+      
+     />
+     
       :null}
         {resultNotFound ||!movies.length? 
         <NotFound />
       : null}
       <Butn style={styles.btnHeart} antIconName='heart'
         color='red'
-        size={38}
+        size={34}
         onPress={() => { navigation.navigate('Favourites') }}/>
     </View>
   );
@@ -78,15 +94,17 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   containerHome: {
     flex: 1,
-    paddingTop: 80
+    paddingTop: 70
   },
   btnHeart: {
     position: 'absolute',
-    top: 30,
-    right: 30,
+    top: 25,
+    right: 25,
     margin:20,
     color: Colors.Error,
     backgroundColor: Colors.Light,
     shadowColor: 'transparent',
-  }
+  },
+ 
 });
+
