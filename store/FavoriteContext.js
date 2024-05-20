@@ -1,6 +1,6 @@
 
 
-import axios from 'axios';
+
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,11 +12,6 @@ export const useFavorites = () => useContext(FavoriteContext);
 export const FavoriteProvider = ({ children }) => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true); 
-
- 
-
-
-
 
   const loadFavorites = async () => {
     try {
@@ -30,10 +25,7 @@ export const FavoriteProvider = ({ children }) => {
       setLoading(false);
     }
   };
-  useEffect(() => {
   
-    loadFavorites();
-  }, []);
 
   const addFavorite = async (movie) => {
     const existingFavorites = favorites.find(favorite => favorite.id === movie.id);
@@ -53,10 +45,13 @@ export const FavoriteProvider = ({ children }) => {
   };
 
   return (
-    <FavoriteContext.Provider value={{ favorites, loading,setFavorites, addFavorite, removeFavorite }}>
+    <FavoriteContext.Provider value={{ favorites, loading, setFavorites, loadFavorites, addFavorite, removeFavorite, setLoading }}>
       {children}
     </FavoriteContext.Provider>
   );
 };
+
+
+
 
 
