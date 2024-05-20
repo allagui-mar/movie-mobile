@@ -13,10 +13,6 @@ const SearchMovie = ({ onChangeText ,value}) => (
     value={value}
     selectionColor="red"
     placeholder="Search"
-    placeholderTextColor={Colors.Secondary}
-    underlineColorAndroid="transparent" 
-    keyboardType="default"
-    autoCapitalize="none"
     autoCorrect={false}
   />
   </View>
